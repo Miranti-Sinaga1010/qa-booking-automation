@@ -1,38 +1,78 @@
 import { test, expect } from '@playwright/test';
 
-test('detect double booking', async () => {
+test.describe('Booking Validation', () => {
 
-const bookings = [
-{
-id:1001,
-venue_id:15,
-date:"2022-12-10",
-start:"09:00",
-end:"11:00"
-},
-{
-id:1005,
-venue_id:15,
-date:"2022-12-10",
-start:"09:00",
-end:"11:00"
-}
-];
+test('Validasi harga sesuai jadwal', async () => {
 
-const map = new Map();
+  const booking = {
+    venue_id: 15,
+    date: '2022-12-10',
+    start_time: '09:00:00',
+    end_time: '11:00:00',
+    price: 1200000
+  };
 
-for (const booking of bookings){
+  const schedulePrice = 1000000;
 
-const key = `${booking.venue_id}-${booking.date}-${booking.start}-${booking.end}`;
+  expect(booking.price).toBe(schedulePrice);
 
-if(map.has(key)){
-throw new Error("Double booking detected")
-}
+});
 
-map.set(key,booking)
 
-}
+test('Tidak boleh double booking', async () => {
 
-expect(true).toBeTruthy()
+  const booking1 = {
+    venue_id: 15,
+    date: '2022-12-10',
+    start_time: '09:00:00',
+    end_time: '11:00:00'
+  };
+
+  const booking2 = {
+    venue_id: 15,
+    date: '2022-12-10',
+    start_time: '09:00:00',
+    end_time: '11:00:00'
+  };
+
+  const isSameSlot =
+    booking1.venue_id === booking2.venue_id &&
+    booking1.date === booking2.date &&
+    booking1.start_time === booking2.start_time &&
+    booking1.end_time === booking2.end_time;
+
+  expect(isSameSlot).toBeFalsy();
+
+});
+
+
+test('Slot tidak tersedia setelah dibooking', async () => {
+
+  const bookedSlots = [
+    {
+      venue_id: 15,
+      date: '2022-12-10',
+      start_time: '09:00:00',
+      end_time: '11:00:00'
+    }
+  ];
+
+  const newBooking = {
+    venue_id: 15,
+    date: '2022-12-10',
+    start_time: '09:00:00',
+    end_time: '11:00:00'
+  };
+
+  const isAvailable = !bookedSlots.some(slot =>
+    slot.venue_id === newBooking.venue_id &&
+    slot.date === newBooking.date &&
+    slot.start_time === newBooking.start_time &&
+    slot.end_time === newBooking.end_time
+  );
+
+  expect(isAvailable).toBeTruthy();
+
+});
 
 });
